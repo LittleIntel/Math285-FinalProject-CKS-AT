@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r packages, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(caret)
+library(rpart)
+library(randomForest)
+```
+
+```{r getData, include = FALSE}
+stopFrisk <- read_csv("stopFrisk.csv")
+str(stopFrisk)
+train_ind <- stopFrisk %>%
+  nrow() %>%
+  sample(size = floor(nrow(stopFrisk)*0.9))
+train <- slice(stopFrisk, train_ind) %>%
+  rename(StopFriskTime = `Stop Frisk Time`) %>%
+  select(-SEARCH_BASIS_ADMISSION_FLAG, -SEARCH_BASIS_CONSENT_FLAG, -SEARCH_BASIS_HARD_OBJECT_FLAG,
+         -SEARCH_BASIS_INCIDENTAL_TO_ARREST_FLAG, -SEARCH_BASIS_OTHER_FLAG, -SEARCH_BASIS_OUTLINE_FLAG,
+         -BACKROUND_CIRCUMSTANCES_VIOLENT_CRIME_FLAG, -BACKROUND_CIRCUMSTANCES_SUSPECT_KNOWN_TO_CARRY_WEAPON_FLAG,
+         -SUSPECT_ARREST_OFFENSE)
+test <- slice(stopFrisk, -train_ind) %>%
+  rename(StopFriskTime = `Stop Frisk Time`) %>%
+  select(-SEARCH_BASIS_ADMISSION_FLAG, -SEARCH_BASIS_CONSENT_FLAG, -SEARCH_BASIS_HARD_OBJECT_FLAG,
+         -SEARCH_BASIS_INCIDENTAL_TO_ARREST_FLAG, -SEARCH_BASIS_OTHER_FLAG, -SEARCH_BASIS_OUTLINE_FLAG,
+         -BACKROUND_CIRCUMSTANCES_VIOLENT_CRIME_FLAG, -BACKROUND_CIRCUMSTANCES_SUSPECT_KNOWN_TO_CARRY_WEAPON_FLAG,
+         -SUSPECT_ARREST_OFFENSE)
+
+stopFrisk <- stopFrisk %>%
+  mutate(date = mdy(STOP_FRISK_DATE),
+         hour = as.numeric(str_extract(`Stop Frisk Time`, "\\d*(?=:)")),
+         month = month(date))
+```
+
+
+
+```{r}
+
+ggplot(stopFrisk, aes(x = DAY2, fill = FRISKED_FLAG)) +
+  geom_bar() + 
+  labs(title = "Stop and Frisk Occurences by Day of the Week",
+       x = "Day of the Week")
+
+ggplot(stopFrisk, aes(x = hour, fill = SUSPECT_SEX)) +
+  geom_bar() +
+  labs(title = "Stop and Frisk Occurences by Hour of the Day")
+
+ggplot(stopFrisk, aes(x = month, fill = FRISKED_FLAG)) +
+  geom_bar() +
+  labs(title = "Stip and Frisk Occurences by Month")
+
+```
+
+
+```{r}
+
+
+
+```
