@@ -3,43 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-### Intro
-
-The highly controversial 1968 *Terry v. Ohio* Supreme Court case ruled that police officers, even when lacking probable cause for an arrest, can search someone's belongings (aka "frisk") in order find weapons if the officer suspects that the person being searched is armed and dangerous at the time of the search. This ruling set the stage for the policy that would later be known as stop and frisk to be put into law in New York City. Despite criticism leveled at the program, it was not put in place without reason. Along with many other police reforms of the time, this new course of action was part of a "broken windows" theory of crime prevention. This theory posits that the best way to prevent crime is to crack down on so-called low-level offences, because those crimes create an environment in which more serious breaches of the law become more acceptable or commonplace. In the modern age, proponents of stop and frisk (or other similar policies) argue that by showing low-level offenders the consequences of their actions before they partake in serious crime, more dangerous crimes will be discouraged. While these may seem to be reasonable theories for preventing crime, the actual execution of stop and frisk was anything but ideal. Perhaps foremost among the problems with the implementation of stop and frisk was the sheer number of stops that occurred. At their peak in 2011, about 685,000 stops occurred in a single year. Furthermore, many of those stops (over 80%) did not result in an arrest (NYCLU). To add to the mess, accusations that the police were racially profiling young African American and Hispanic men were rampant. These accusations were not just hot air, either. The 2013 case Floyd v. City of New York ruled that stop and frisk had been used in a racial discriminatory and thus, unconstitutional manner. Since that time, the number of reported stop and frisk cases has dropped precipitously. However, questions about the current state of policing in NYC still remain. Is racial profiling still occuring? How many stops happen in a year? How succesful are these stops at finding and arresting criminals? These questions, and many others, are the focus of this project.
-
-### The Data
-Things to talk about:
-  Data is self reported on three levels (each case is a record created by an officer (or group of officers) which includes data reported by a 'suspect'. The dataset as a whole is then turned over by the police)
-  Using arrests as a measure for stop success is difficult because of bias (racial bias, bias about who is a criminal, and of course, confirmation bias and 'if I don't arrest this person I was wrong to stop them' bias)
-
-
-
-### Methodology
-As this dataset was collected by people, there are many possible errors here. Did we adress this?
-There are lots of "(null)"s. Removed those to actual ("null")s.
-
-
-
-### Results
-The number of stops performed by police does seem to vary by time of day. In particular, there is a noticeable peak in stops during the early evening, although the exact time varies according to the time of year. In the winter, the peak time tends to be roughly 5:00 PM, while in the summer, the peak is a few hours later. Furthermore, there is also a consistent dip in the number of stops in the very early morning, although that dip is more pronounced in the cooler months. This makes sense; the early evening is a time when many people leave their homes to eat out or do other activities throughout the city, while relatively few people will tend to be out of bed in the early morning. In the colder months, people will avoid going outside in the coldest parts of the day (the early morning) even more than usual; during the summer months, people may tend to stay out later in larger numbers than during the winter. 
-
-To see how correct this guess is, we can look at the number of stops performed in 2018 over the course of the year. We can see that indeed, fewer stops are made during the winter months. In particular, December seems to be a low point for number of stops. 
-
-
-Therefore, these trends in police stop-and-frisk occurrences might be explained by the natural ebb and flow of people being outside. On the other hand, it may be that police officers are more reluctant to stand outside searching for criminal activity in the winter months as compared to summer months, or that conditions such as icy roads or adverse weather conditions may impede the type of police activity that leads to stops. Further, it may be that similar numbers of people are on the streets in NYC in the early morning (it is the city that never sleeps, after all) but that the number of police officers outside at that time is diminished. Thus, if one wishes to avoid being stopped by police (for whatever reason), it may at first seem reasonable to sneak outside in the very early morning. However, it may be that among people outside at, say, 3:00 AM, a higher proportion of people are stopped by police as compared to people who are outside during the evening. Without data on when NYC residents tend to be outside in large numbers, it is difficult to draw any concrete conclusions about when people are most likely to be stopped. 
-
-
-
-Taking a look at days of the week, there do appear to be fewer stops made on certain days of the week, namely Sundays and Mondays. However, there does not appear to be a pattern in the number of stops made over the course of a month. 
-
-
-
-
-
-### Works Cited
-
-“Stop-and-Frisk Data.” New York Civil Liberties Union. New York Civil Liberties Union, March 11, 2020. https://www.nyclu.org/en/stop-and-frisk-data.
-
 ```{r packages, include=FALSE}
 library(tidyverse)
 library(lubridate)
@@ -60,24 +23,59 @@ stopFrisk <- stopFrisk %>%
          day = day(date))
 ```
 
+### Intro
+
+The highly controversial 1968 *Terry v. Ohio* Supreme Court case ruled that police officers, even when lacking probable cause for an arrest, can search someone's belongings (aka "frisk") in order find weapons if the officer suspects that the person being searched is armed and dangerous at the time of the search. This ruling set the stage for the policy that would later be known as stop and frisk to be put into law in New York City. Despite criticism leveled at the program, it was not put in place without reason. Along with many other police reforms of the time, this new course of action was part of a "broken windows" theory of crime prevention. This theory posits that the best way to prevent crime is to crack down on so-called low-level offences, because those crimes create an environment in which more serious breaches of the law become more acceptable or commonplace. In the modern age, proponents of stop and frisk (or other similar policies) argue that by showing low-level offenders the consequences of their actions before they partake in serious crime, more dangerous crimes will be discouraged. While these may seem to be reasonable theories for preventing crime, the actual execution of stop and frisk was anything but ideal. Perhaps foremost among the problems with the implementation of stop and frisk was the sheer number of stops that occurred. At their peak in 2011, about 685,000 stops occurred in a single year. Furthermore, many of those stops (over 80%) did not result in an arrest (NYCLU). To add to the mess, accusations that the police were racially profiling young African American and Hispanic men were rampant. These accusations were not just hot air, either. The 2013 case Floyd v. City of New York ruled that stop and frisk had been used in a racial discriminatory and thus, unconstitutional manner. Since that time, the number of reported stop and frisk cases has dropped precipitously. However, questions about the current state of policing in NYC still remain. Is racial profiling still occuring? How many stops happen in a year? How succesful are these stops at finding and arresting criminals? These questions, and many others, are the focus of this project.
+
+### The Data
+Things to talk about:
+  Data is self reported on three levels (each case is a record created by an officer (or group of officers) which includes data reported by a 'suspect'. The dataset as a whole is then turned over by the police)
+  Using arrests as a measure for stop success is difficult because of bias (racial bias, bias about who is a criminal, and of course, confirmation bias and 'if I don't arrest this person I was wrong to stop them' bias)
+
+
+
+### Methodology
+As this dataset was collected by people, there are many possible errors here. Did we adress this?
+There are lots of "(null)"s. Removed those to actual ("null")s.
+
+
+
+### Results
+
+The number of stops performed by police does seem to vary by time of day. In particular, there is a noticeable peak in stops during the early evening, although the exact time varies according to the time of year. In the winter, the peak time tends to be roughly 5:00 PM, while in the summer, the peak is a few hours later. Furthermore, there is also a consistent dip in the number of stops in the very early morning, although that dip is more pronounced in the cooler months. This makes sense; the early evening is a time when many people leave their homes to eat out or do other activities throughout the city, while relatively few people will tend to be out of bed in the early morning. In the colder months, people will avoid going outside in the coldest parts of the day (the early morning) even more than usual; during the summer months, people may tend to stay out later in larger numbers than during the winter. 
+
+
 ```{r time}
 
-ggplot(stopFrisk, aes(x = DAY2, fill = SUSPECT_ARRESTED_FLAG)) +
-  geom_bar() + 
-  labs(title = "Stop and Frisk Occurences by Day of the Week",
-       x = "Day of the Week", 
-       fill = "Did the stop lead to an arrest?")
-
-ggplot(stopFrisk, aes(x = hour, fill = SEARCHED_FLAG)) +
-  geom_bar() +
-  labs(title = "Stop and Frisk Occurences by Hour of the Day")
 
 stopFrisk %>%
-  filter(month %in% c(1, 6)) %>%
-  mutate(month = as.factor(month)) %>%
-  ggplot(aes(x = hour, fill = month)) +
+  mutate(Season = ifelse(month < 3, "Winter",
+                         ifelse(month == 12, "Winter",
+                                ifelse(month > 5, "Other",
+                                       ifelse(month < 9, "Summer", "Other"))))) %>%
+  filter(Season != "Other") %>%
+  drop_na(Season, hour) %>%
+  mutate(Season = as.factor(Season)) %>%
+  ggplot(aes(x = hour, fill = Season)) +
     geom_bar(position = "dodge") +
-    labs(title = "Stop and Frisk Occurences by Hour of the Day")
+    labs(title = "Stop and Frisk Occurences by Hour of the Day in Winter and Summer") +
+    scale color
+
+
+```
+
+To see how correct this guess is, we can look at the number of stops performed in 2018 over the course of the year. We can see that indeed, fewer stops are made during the winter months. In particular, December seems to be a low point for number of stops. 
+
+
+Therefore, these trends in police stop-and-frisk occurrences might be explained by the natural ebb and flow of people being outside. On the other hand, it may be that police officers are more reluctant to stand outside searching for criminal activity in the winter months as compared to summer months, or that conditions such as icy roads or adverse weather conditions may impede the type of police activity that leads to stops. Further, it may be that similar numbers of people are on the streets in NYC in the early morning (it is the city that never sleeps, after all) but that the number of police officers outside at that time is diminished. Thus, if one wishes to avoid being stopped by police (for whatever reason), it may at first seem reasonable to sneak outside in the very early morning. However, it may be that among people outside at, say, 3:00 AM, a higher proportion of people are stopped by police as compared to people who are outside during the evening. Without data on when NYC residents tend to be outside in large numbers, it is difficult to draw any concrete conclusions about when people are most likely to be stopped. 
+
+
+
+Taking a look at days of the week, there do appear to be fewer stops made on certain days of the week, namely Sundays and Mondays. However, there does not appear to be a pattern in the number of stops made over the course of a month. 
+
+
+```{r}
+
 
 ggplot(stopFrisk, aes(x = month, fill = SEARCHED_FLAG)) +
   geom_bar() +
@@ -88,13 +86,21 @@ ggplot(stopFrisk, aes(x = day, fill = SEARCHED_FLAG)) +
   geom_bar() +
   labs(title = "Stops By day of the Month")
 
-stopFrisk %>%
-  filter(month %in% c(12, 6)) %>%
-  mutate(month = as.factor(month)) %>%
-  ggplot(aes(x = day, fill = month)) +
-    geom_bar() +
-    labs(title = "Stops By day of December")
+ggplot(stopFrisk, aes(x = DAY2, fill = SUSPECT_ARRESTED_FLAG)) +
+  geom_bar() + 
+  labs(title = "Stop and Frisk Occurences by Day of the Week",
+       x = "Day of the Week", 
+       fill = "Did the stop lead to an arrest?")
+
+
 ```
+
+
+### Works Cited
+
+“Stop-and-Frisk Data.” New York Civil Liberties Union. New York Civil Liberties Union, March 11, 2020. https://www.nyclu.org/en/stop-and-frisk-data.
+
+
 
 
 ```{r suspect, fig.width=11}
