@@ -1,0 +1,200 @@
+---
+title: "Allegra Work Final"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Loading packages
+```{r}
+library(tidyverse)
+library(shiny)
+```
+Loading data
+```{r}
+getwd()
+stopfrisk <- read.csv("2018_sqf_database.csv")
+```
+Spatial variables (and other important)
+
+```{r}
+sf_spatial <- stopfrisk %>% 
+  select(STOP_FRISK_ID, STOP_WAS_INITIATED, ISSUING_OFFICER_RANK,
+         SUPERVISING_OFFICER_RANK, JURISDICTION_CODE, JURISDICTION_DESCRIPTION, SUSPECTED_CRIME_DESCRIPTION,
+         OFFICER_EXPLAINED_STOP_FLAG, OTHER_PERSON_STOPPED_FLAG, SUSPECT_ARRESTED_FLAG, 
+         SUSPECT_ARREST_OFFENSE, SUMMONS_ISSUED_FLAG, OFFICER_IN_UNIFORM_FLAG, FRISKED_FLAG, 
+         SEARCHED_FLAG, OTHER_CONTRABAND_FLAG, WEAPON_FOUND_FLAG, PHYSICAL_FORCE_VERBAL_INSTRUCTION_FLAG,
+         DEMEANOR_CODE, DEMEANOR_OF_PERSON_STOPPED, SUSPECT_REPORTED_AGE, SUSPECT_SEX, 
+         SUSPECT_RACE_DESCRIPTION, SUSPECT_HEIGHT, SUSPECT_WEIGHT, SUSPECT_BODY_BUILD_TYPE, 
+         SUSPECT_EYE_COLOR, SUSPECT_HAIR_COLOR, STOP_LOCATION_PRECINCT, STOP_LOCATION_STREET_NAME,
+         STOP_LOCATION_X, STOP_LOCATION_Y, STOP_LOCATION_PATROL_BORO_NAME, 
+         STOP_LOCATION_BORO_NAME, STOP_LOCATION_FULL_ADDRESS)
+class(sf_spatial$STOP_LOCATION_BORO_NAME)
+levels(sf_spatial$STOP_LOCATION_BORO_NAME)
+```
+Step 1: create new variables with coordinates matched to each boro
+From Google (just like their data:)
+Manhattan = 40.7831 N, 73.9712 W
+Brooklyn = 40.6782 N, 73.9442 W
+Staten Island = 40.5795 N, 74.1502 W
+The Bronx = 40.8448 N, 73.8648 W
+Queens = 40.7282 N, 73.7949 W
+
+Recoding SUSPECT_RACE_DESCRIPTION
+
+```{r}
+levels(sf_spatial$SUSPECT_RACE_DESCRIPTION)
+sf_spatial$SUSPECT_RACE_DESCRIPTION <-
+  recode_factor(sf_spatial$SUSPECT_RACE_DESCRIPTION, "(null)" = "NA", 
+                "AMERICAN INDIAN/ALASKAN NATIVE" = "American Indian/Alaskan Native", 
+                "ASIAN / PACIFIC ISLANDER" = "Asian/Pacific Islander", 
+                "BLACK" = "Black", "BLACK HISPANIC" = "Black Hispanic", 
+                "WHITE" = "White", "WHITE HISPANIC" = "White Hispanic") 
+levels(sf_spatial$SUSPECT_RACE_DESCRIPTION)
+```
+
+```{r, eval = FALSE}
+sf_spatial <- sf_spatial %>% 
+```
+Leaving that stuff for later
+
+Simple interactive plot: 
+Choose the borough and it gives you count or prop stats for SUSPECT_RACE_DESCRIPTION and SUSPECT_ARREST_OFFENCE
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_boro", label = "Borough:",
+              choices = c("Bronx" = "BRONX",
+                          "Brooklyn" = "BROOKLYN", 
+                          "Manhattan" = "MANHATTAN", 
+                          "Queens" = "QUEENS",
+                          "Staten Island" = "STATEN ISLAND")),
+  selectInput("n_var", label = "Variable:", 
+              choices = c(
+              "Suspect Race" = "SUSPECT_RACE_DESCRIPTION", 
+              "Suspect Height" = "SUSPECT_HEIGHT",
+              "Suspect Gender" = "SUSPECT_SEX",
+              "Arrest Offense" = "SUSPECT_ARREST_OFFENSE"))
+              )
+
+renderPlot({
+  ggplot(data = sf_spatial) +
+    geom_boxplot(aes(x = input$n_boro, y = input$n_var))
+  })
+```
+
+Holding off on shiny, making plotly:
+
+Map of the boroughs: 
+There seem to be far more stops in Manhattan, Brooklyn, and the Bronx than Queens or Staten Island. From the Furman Center (https://furmancenter.org/files/sotc/The_Changing_Racial_and_Ethnic_Makeup_of_New_York_City_Neighborhoods_11.pdf), Staten Island and Queens both have the highest proportions of white NYC residents while Brooklyn and the Bronx have larger (proportionally) black and hispanic populations. The discrepancy in density of stop and frisk locations displayed below may therefore point to 1) the tendency to more heavily patrol majority black and hispanic neighborhoods and 2) the tendency to more readily stop and frisk black and hispanic individuals as opposed to white or Asian individuals. Indeed, northeastern Queens has the largest proportion of Asian residents and has far lower density of stop and frisk incidences than the Bronx, Manhattan, or Brooklyn.
+```{r}
+ggplot(data = sf_spatial) + 
+  geom_point(aes(x = STOP_LOCATION_X, y = STOP_LOCATION_Y, 
+                 color = STOP_LOCATION_BORO_NAME)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  ggtitle("Stop Locations by New York City Borough")
+```
+
+
+Suspect race by location
+White hispanic individuals seem to account for the largest proportion of stops in Brooklyn, Manhattan, and the Bronx. Stops in Staten Island are mostly white individuals - though again, it's important to remember that the majority of indivdiuals living in Staten Island are white. 
+```{r}
+library(plotly)
+plot <- ggplot(data = sf_spatial) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.3, jitter.height = 0.3),
+             aes(x = STOP_LOCATION_X, y = STOP_LOCATION_Y, color = SUSPECT_RACE_DESCRIPTION)) +
+  xlab("Longitude") + ylab("Latitude") + ggtitle("Suspect Race by Stop Location - NYC") +
+  scale_colour_discrete(name="Suspect Race",
+                      breaks=c("(null)", "AMERICAN INDIAN/ALASKA NATIVE", "ASIAN / PACIFIC ISLANDER",
+                               "BLACK", "BLACK HISPANIC", "WHITE", "WHITE HISPANIC"), 
+                      labels = c("Null", "American Indian/Alaska Native", "Asian/Pacific Islander",
+                                 "Black", "Black Hispanic", "White", "White Hispanic")) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+  
+  #scale_fill_manual(name="Suspect Race")
+                     
+                     #labels = c("(null)" = "Null", "AMERICAN INDIAN/ALASKA NATIVE" = 
+                                   #"American Indian/Alaska Native", 
+                                 #"ASIAN / PACIFIC ISLANDER" = "Asian/Pacific Islander",
+                                 #"BLACK" = "Black", "BLACK HISPANIC" = "Black Hispanic", 
+                                 #"WHITE" = "White", "WHITE HISPANIC" = "White Hispanic"))
+  
+  
+  #scale_colour_discrete(name="Suspect Race",
+                      #breaks=c("(null)", "AMERICAN INDIAN/ALASKA NATIVE", "ASIAN / PACIFIC ISLANDER",
+                               #"BLACK", "BLACK HISPANIC", "WHITE", "WHITE HISPANIC"), 
+                      #labels = c("Null", "American Indian/Alaska Native", "Asian/Pacific Islander",
+                                 #"Black", "Black Hispanic", "White", "White Hispanic"))
+ggplotly(plot)
+```
+
+Bar charts: prop arrested by borough
+Making prop
+```{r}
+sf_spatial <- sf_spatial %>% 
+  group_by(STOP_LOCATION_BORO_NAME, SUSPECT_RACE_DESCRIPTION) %>% 
+  mutate(n = n()) %>% 
+  group_by(SUSPECT_RACE_DESCRIPTION) %>% 
+  mutate(prop = n / sum(n)) 
+sf_spatial %>% select(STOP_LOCATION_BORO_NAME, SUSPECT_RACE_DESCRIPTION, n, prop)
+
+sf_spatial %>% group_by(STOP_LOCATION_BORO_NAME) %>% 
+  summarize(prop)
+```
+
+```{r}
+sf_spatial %>% filter(SUSPECT_RACE_DESCRIPTION != "NA") %>% 
+  ggplot(aes(x = STOP_LOCATION_BORO_NAME, y = prop)) + 
+  geom_bar(aes(fill = SUSPECT_RACE_DESCRIPTION), stat = "identity") + facet_wrap(~SUSPECT_RACE_DESCRIPTION) +
+  scale_fill_brewer(palette = "Set2", name = "Suspect Race") + 
+  coord_flip() + 
+  labs(y = "Proportion", x = "Borough")
+```
+Asian/Pacific Islanders are most often stopped in Queens (where most of them lived). They appear to be largely targetted in their own communities. Black individuals are most often stopped in Brookyln, which also has a large proportion of black residents. White hispanic individuals are roughly equivalently stopped across all five boroughs. White individuals are most often stopped in Brooklyn, which is interesting given that that Brooklyn has a higher proportion of black residents. This may point to greater stop and frisk efforts in Brooklyn or a sense that white people are out of place there. Black hispanic individuals are most often stopped in Manhattan and the Bronx, both of which have larger proportions of black and hispanic residents (though I did not find data on black hispanic residents).
+
+```{r}
+sf_spatial %>% filter(SUSPECT_RACE_DESCRIPTION != "NA") %>% 
+  ggplot(aes(x = STOP_LOCATION_BORO_NAME, y = prop)) + 
+  geom_bar(aes(fill = SUSPECT_RACE_DESCRIPTION), stat = "identity") +
+  scale_fill_brewer(palette = "Set2", name = "Suspect Race") + 
+  coord_flip() + 
+  labs(y = "Proportion", x = "Borough")
+```
+Staten Island (which has more white)
+
+Making a decision tree: would you be arrested if you were stopped and frisked?
+
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
